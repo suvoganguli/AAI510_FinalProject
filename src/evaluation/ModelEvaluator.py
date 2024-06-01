@@ -2,7 +2,7 @@ from typing import Dict
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn.metrics import mean_squared_error, root_mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, root_mean_squared_error, mean_absolute_error, r2_score
 
 
 class ModelEvaluator:
@@ -14,17 +14,19 @@ class ModelEvaluator:
 
         :param actual_values: The actual known values.
         :param predicted_values: The predicted values produced by the model.
-        :return: A dictionary containing the Mean Squared Error (MSE), Root Mean Squared Error (RMSE), and Mean Absolute
-        Error (MAE).
+        :return: A dictionary containing the Mean Squared Error (MSE), Root Mean Squared Error (RMSE), Mean Absolute
+        Error (MAE), and R-Squared score (R^2).
         """
         mse = mean_squared_error(actual_values, predicted_values)
         rmse = root_mean_squared_error(actual_values, predicted_values)
         mae = mean_absolute_error(actual_values, predicted_values)
+        r2 = r2_score(actual_values, predicted_values)
 
         return {
             "mse": mse,
             "rmse": rmse,
-            "mae": mae
+            "mae": mae,
+            "r2": r2
         }
 
     @staticmethod

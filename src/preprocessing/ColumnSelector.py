@@ -1,40 +1,29 @@
 from typing import List
+
 import pandas as pd
-from sklearn.feature_selection import VarianceThreshold, SelectKBest, chi2, RFE
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import SelectKBest, chi2, RFE
 
 
 class ColumnSelector:
-    @staticmethod
-    def variance_threshold_selector(data: pd.DataFrame, threshold: float) -> pd.DataFrame:
-        """
-        Selects the columns in the DataFrame whose variance exceeds a certain threshold.
-
-        :param data: A pandas DataFrame containing the columns to be selected.
-        :param threshold: The minimum variance required for a column to be selected.
-        :return: A pandas DataFrame with the selected columns.
-        """
-        selector = VarianceThreshold(threshold)
-        selector.fit(data)
-        return data[data.columns[selector.get_support(indices=True)]]
 
     @staticmethod
-    def select_k_best(data: pd.DataFrame, labels: List[str], k: int) -> pd.DataFrame:
+    def select_k_best(x_train: pd.DataFrame, y_train: pd.Series, k: int) -> List[str]:
         """
         Selects the k columns that are most strongly related to the output variable.
 
-        :param data: A pandas DataFrame containing the columns to be selected.
-        :param labels: A list of output variables.
+        :param x_train: A pandas DataFrame containing feature columns.
+        :param y_train: A pandas Series containing the target values.
         :param k: The number of columns to select.
         :return: A pandas DataFrame with the selected columns.
         """
         selector = SelectKBest(chi2, k=k)
-        selector.fit(data, labels)
-        return data[data.columns[selector.get_support(indices=True)]]
+        selector.fit(x_train, y_train.to_list())
+        return x_train.columns[selector.get_support(indices=False)].to_list()
 
     @staticmethod
     def recursive_feature_elimination(x_train: pd.DataFrame, y_train: pd.Series,
-                                      n_features_to_select: int) -> pd.DataFrame:
+                                      n_features_to_select: int) -> List[str]:
         """
         Recursively eliminates less important features.
 
@@ -43,7 +32,17 @@ class ColumnSelector:
         :param n_features_to_select: The number of features to be selected.
         :return: A pandas DataFrame with the selected columns.
         """
-        model = GradientBoostingRegressor()
+        model = RandomForestRegressor()
         rfe = RFE(estimator=model, n_features_to_select=n_features_to_select)
         rfe.fit(x_train, y_train)
-        return x_train[x_train.columns[rfe.get_support(indices=True)]]
+        return x_train.columns[rfe.get_support(indices=True)]
+
+    @staticmethod
+    def get_categorical_features(data: pd.DataFrame) -> List[str]:
+        """
+        Returns a list of all the columns in the provided DataFrame that have categorical data
+
+        :param data: A pandas DataFrame
+        :return: A list of column names that have categorical data
+        """
+        return data.select_dtypes(include=['object']).columns.tolist()
