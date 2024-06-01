@@ -4,10 +4,30 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
-class DataSplitter:
+class DataCleaner:
+
+    @staticmethod
+    def perform_base_cleaning(data: pd.DataFrame) -> pd.DataFrame:
+        """
+        This method removes any records that don't have a price, converts the price from string to float, and removes
+        non-training columns.
+
+        :param data: A DataFrame that has the raw data to be cleaned
+        :return: A DataFrame with the cleaned data
+        """
+        data_copy = data.copy()
+        data_copy = data_copy[data["price"].notna()]
+        data_copy["price"] = data_copy["price"].str.replace("$", "").str.replace(",", "").astype(float)
+        return DataCleaner.remove_non_training_columns(data_copy)
 
     @staticmethod
     def remove_non_training_columns(data: pd.DataFrame) -> pd.DataFrame:
+        """
+        This method removes columns from the DataFrame that are not necessary for the training process.
+
+        :param data: A DataFrame with the base data
+        :return: A DataFrame with only the necessary columns for the training process
+        """
         return data[
             ["host_listings_count", "host_total_listings_count", "neighbourhood_cleansed",
              "neighbourhood_group_cleansed", "property_type", "room_type", "accommodates", "bathrooms", "bedrooms",
@@ -22,13 +42,35 @@ class DataSplitter:
 
     @staticmethod
     def split_train_val_test(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        """
+        This method splits the input data into training, validation, and testing data.
+
+        :param data: The pandas DataFrame to be split
+        :return: a tuple containing three DataFrames: training data, validation data, and testing data
+        """
         train_data, test_val_data = train_test_split(data, test_size=0.4, random_state=1)
         val_data, test_data = train_test_split(test_val_data, test_size=0.5, random_state=1)
         return train_data, val_data, test_data
 
     @staticmethod
     def perform_x_y_split(train_data: pd.DataFrame, val_data: pd.DataFrame, test_data: pd.DataFrame) -> Tuple[
-            pd.DataFrame, pd.Series, pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+        pd.DataFrame, pd.Series, pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+        """
+        This method splits the given training, validation and test datasets into features (X) and the target
+        variable (y) for each set.
+
+        :param train_data: A pandas DataFrame containing the training data
+        :param val_data: A pandas DataFrame containing the validation data
+        :param test_data: A pandas DataFrame containing the test data
+
+        :return: A tuple with 6 components:
+                    - x_train: Features for the training data
+                    - y_train: Target variable for the training data
+                    - x_val: Features for the validation data
+                    - y_val: Target variable for the validation data
+                    - x_test: Features for the test data
+                    - y_test: Target variable for the test data
+        """
         x_train: pd.DataFrame = train_data.drop(columns=["price"])
         x_val: pd.DataFrame = val_data.drop(columns=["price"])
         x_test: pd.DataFrame = test_data.drop(columns=["price"])

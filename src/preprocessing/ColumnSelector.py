@@ -1,7 +1,7 @@
 from typing import List
 
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.feature_selection import SelectKBest, chi2, RFE
 
 
@@ -32,10 +32,10 @@ class ColumnSelector:
         :param n_features_to_select: The number of features to be selected.
         :return: A pandas DataFrame with the selected columns.
         """
-        model = RandomForestRegressor()
+        model = GradientBoostingRegressor(random_state=1)
         rfe = RFE(estimator=model, n_features_to_select=n_features_to_select)
         rfe.fit(x_train, y_train)
-        return x_train.columns[rfe.get_support(indices=True)]
+        return x_train.columns[rfe.get_support(indices=False)].to_list()
 
     @staticmethod
     def get_categorical_features(data: pd.DataFrame) -> List[str]:

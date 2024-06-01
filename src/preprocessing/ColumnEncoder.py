@@ -72,4 +72,4 @@ class ColumnEncoder:
         for column in columns_to_encode:
             encoding = data_copy.groupby(column).size() / len(data_copy)
             data_copy[column] = data_copy[column].map(encoding)
-        return data
+        return data_copy
