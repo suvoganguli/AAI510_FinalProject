@@ -17,7 +17,7 @@ data_path: str = "../data/listings-full.csv"
 data: pd.DataFrame = pd.read_csv(data_path)
 data = DataCleaner.perform_base_cleaning(data)
 
-data = DataImputer.cap_outliers(data, ["price"])
+data = DataImputer.remove_outliers_iqr(data, ["price"])
 train_data, val_data, test_data = DataCleaner.split_train_val_test(data)
 
 train_data = ColumnEncoder.mean_encode_columns(train_data, ColumnSelector.get_categorical_features(train_data), "price")

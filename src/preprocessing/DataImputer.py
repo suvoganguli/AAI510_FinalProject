@@ -22,20 +22,40 @@ class DataImputer:
         return data_copy
 
     @staticmethod
-    def remove_outliers(data: pd.DataFrame, columns_to_check: List[str], threshold: float = 3) -> pd.DataFrame:
+    def remove_outliers_zscore(data: pd.DataFrame, columns_to_check: List[str], threshold: float = 3) -> pd.DataFrame:
         """
         Removes outliers from the specified columns of the data DataFrame.
 
         :param data: A pandas DataFrame containing the columns to be checked for outliers.
         :param columns_to_check: A list of column names to be checked for outliers.
         :param threshold: The threshold Z-score above which a data point is considered an outlier.
-                          Defaults to 1.5.
+                          Defaults to 3.
         :return: A pandas DataFrame with the outliers removed from the specified columns.
         """
         data_copy = data.copy()
         for column in columns_to_check:
             z_scores = np.abs((data_copy[column] - data_copy[column].mean()) / data_copy[column].std())
             data_copy = data_copy[~(z_scores > threshold)]
+        return data_copy
+
+    @staticmethod
+    def remove_outliers_iqr(data: pd.DataFrame, columns_to_check: List[str], multiplier: float = 1.5) -> pd.DataFrame:
+        """
+        Removes outliers from the specified columns of the data DataFrame using the Interquartile Range Method.
+        Any data point that is below Q1 - (multiplier * IQR) or above Q3 + (multiplier * IQR) is considered an outlier.
+
+        :param data: A pandas DataFrame containing the columns to be checked for outliers.
+        :param columns_to_check: A list of column names to be checked for outliers.
+        :param multiplier: The multiplier for the IQR. Defaults to 1.5.
+        :return: A pandas DataFrame with the outliers removed from the specified columns.
+        """
+        data_copy = data.copy()
+        for column in columns_to_check:
+            q1 = data_copy[column].quantile(0.25)
+            q3 = data_copy[column].quantile(0.75)
+            iqr = q3 - q1
+            data_copy = data_copy[
+                (data_copy[column] > (q1 - multiplier * iqr)) & (data_copy[column] < (q3 + multiplier * iqr))]
         return data_copy
 
     @staticmethod
