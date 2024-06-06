@@ -30,7 +30,8 @@ val_data = DataImputer.impute_missing_values(val_data, data.columns, SimpleImput
 x_train, y_train, x_val, y_val, x_test, y_test = DataCleaner.perform_x_y_split(train_data, val_data, test_data)
 
 print("Finding top columns.")
-top_columns: List[str] = ColumnSelector.recursive_feature_elimination(x_train, y_train, 15)
+top_columns: List[str] = ColumnSelector.recursive_feature_elimination(x_train, y_train, 20)
+# ['host_response_rate', 'host_acceptance_rate', 'host_listings_count', 'host_total_listings_count', 'neighbourhood_cleansed', 'property_type', 'accommodates', 'bathrooms', 'bedrooms', 'minimum_nights', 'maximum_minimum_nights', 'minimum_nights_avg_ntm', 'availability_30', 'availability_90', 'review_scores_cleanliness', 'calculated_host_listings_count', 'calculated_host_listings_count_entire_homes', 'calculated_host_listings_count_private_rooms', 'latitude', 'longitude']
 print(f"Top columns: {top_columns}")
 x_train = x_train[top_columns]
 x_val = x_val[top_columns]
@@ -49,3 +50,4 @@ print("Evaluating model.")
 val_preds = model.predict(x_val)
 print(ModelEvaluator.get_key_metrics(y_val, val_preds))
 ModelEvaluator.plot_predictions_vs_actuals(y_val, val_preds)
+# Best result: {'mse': 2507.887673913802, 'rmse': 50.078814621692096, 'mae': 34.43816491582932, 'r2': 0.7294924558015126}

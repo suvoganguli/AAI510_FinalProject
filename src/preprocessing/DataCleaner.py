@@ -15,10 +15,13 @@ class DataCleaner:
         :param data: A DataFrame that has the raw data to be cleaned
         :return: A DataFrame with the cleaned data
         """
-        data_copy = data.copy()
+        data_copy = DataCleaner.remove_non_training_columns(data.copy())
         data_copy = data_copy[data["price"].notna()]
         data_copy["price"] = data_copy["price"].str.replace("$", "").str.replace(",", "").astype(float)
-        return DataCleaner.remove_non_training_columns(data_copy)
+        data_copy["host_response_rate"] = data_copy["host_response_rate"].str.replace("%", "").astype(float)
+        data_copy["host_acceptance_rate"] = data_copy["host_acceptance_rate"].str.replace("%", "").astype(float)
+        data_copy["host_is_superhost"] = data_copy["host_is_superhost"].map({'t': 1, 'f': 0})
+        return data_copy
 
     @staticmethod
     def remove_non_training_columns(data: pd.DataFrame) -> pd.DataFrame:
@@ -29,7 +32,8 @@ class DataCleaner:
         :return: A DataFrame with only the necessary columns for the training process
         """
         return data[
-            ["host_listings_count", "host_total_listings_count", "neighbourhood_cleansed",
+            ["host_response_time", "host_response_rate", "host_acceptance_rate", "host_is_superhost",
+             "host_listings_count", "host_total_listings_count", "neighbourhood_cleansed",
              "neighbourhood_group_cleansed", "property_type", "room_type", "accommodates", "bathrooms", "bedrooms",
              "price", "minimum_nights", "maximum_nights", "minimum_minimum_nights", "maximum_minimum_nights",
              "minimum_maximum_nights", "maximum_maximum_nights", "minimum_nights_avg_ntm", "maximum_nights_avg_ntm",
@@ -38,7 +42,7 @@ class DataCleaner:
              "review_scores_cleanliness", "review_scores_checkin", "review_scores_communication",
              "review_scores_location", "review_scores_value", "calculated_host_listings_count",
              "calculated_host_listings_count_entire_homes", "calculated_host_listings_count_private_rooms",
-             "calculated_host_listings_count_shared_rooms", "reviews_per_month"]]
+             "calculated_host_listings_count_shared_rooms", "reviews_per_month", "latitude", "longitude"]]
 
     @staticmethod
     def split_train_val_test(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
