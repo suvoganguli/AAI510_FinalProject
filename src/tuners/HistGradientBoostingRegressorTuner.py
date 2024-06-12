@@ -1,8 +1,9 @@
 from typing import Callable
+from math import sqrt
 
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
-from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import mean_squared_error
 
 
 class HistGradientBoostingRegressorTuner:
@@ -46,6 +47,6 @@ class HistGradientBoostingRegressorTuner:
             )
             tune_model.fit(x_train, y_train)
             model_val_pred = tune_model.predict(x_val)
-            return root_mean_squared_error(y_val, model_val_pred)
+            return sqrt(mean_squared_error(y_val, model_val_pred))
 
         return objective

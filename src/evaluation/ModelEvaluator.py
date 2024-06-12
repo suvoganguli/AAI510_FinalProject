@@ -1,8 +1,9 @@
 from typing import Dict
+from math import sqrt
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn.metrics import mean_squared_error, root_mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
 class ModelEvaluator:
@@ -18,7 +19,7 @@ class ModelEvaluator:
         Error (MAE).
         """
         mse = mean_squared_error(actual_values, predicted_values)
-        rmse = root_mean_squared_error(actual_values, predicted_values)
+        rmse = sqrt(actual_values, predicted_values)
         mae = mean_absolute_error(actual_values, predicted_values)
 
         return {
