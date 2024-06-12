@@ -25,6 +25,24 @@ class ColumnEncoder:
         return data_copy
 
     @staticmethod
+    def median_encode_columns(data: pd.DataFrame, columns_to_encode: List[str], target_column: str) -> pd.DataFrame:
+        """
+        Encodes the specified columns in the data DataFrame using median encoding.
+        For each specified column, the function calculates the meadian value of the target column
+        for each category in the column, and replaces each category with its calculated median value.
+
+        :param data: A pandas DataFrame containing the columns to be mean-encoded.
+        :param columns_to_encode: A list of column names to be mean-encoded.
+        :param target_column: The name of the target column.
+        :return: A pandas DataFrame with the median-encoded values in the specified columns.
+        """
+        data_copy = data.copy()
+        for column in columns_to_encode:
+            median_values = data_copy.groupby(column)[target_column].median()
+            data_copy[column] = data_copy[column].map(median_values)
+        return data_copy
+
+    @staticmethod
     def one_hot_encode_columns(data: pd.DataFrame, columns_to_encode: List[str]) -> pd.DataFrame:
         """
         Encodes the specified columns in the given DataFrame using frequency encoding.
