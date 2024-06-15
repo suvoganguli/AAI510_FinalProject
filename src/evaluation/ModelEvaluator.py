@@ -1,5 +1,5 @@
-from typing import Dict
 from math import sqrt
+from typing import Dict
 
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -19,7 +19,7 @@ class ModelEvaluator:
         Error (MAE).
         """
         mse = mean_squared_error(actual_values, predicted_values)
-        rmse = sqrt(actual_values, predicted_values)
+        rmse = sqrt(mean_squared_error(actual_values, predicted_values))
         mae = mean_absolute_error(actual_values, predicted_values)
 
         return {
