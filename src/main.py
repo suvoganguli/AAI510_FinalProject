@@ -17,6 +17,22 @@ one_hot_columns = ['neighbourhood_group_cleansed', 'property_type']
 label_encode_columns = ['host_response_time']
 frequency_encode_columns = ['room_type']
 
+mean_impute_columns = ['host_listings_count', 'room_type', 'accommodates', 'minimum_nights', 'maximum_minimum_nights',
+                       'minimum_maximum_nights', 'maximum_maximum_nights', 'maximum_nights_avg_ntm',
+                       'number_of_reviews_ltm', 'number_of_reviews_l30d', 'calculated_host_listings_count',
+                       'dist_empire_state_building', 'dist_laguardia', 'amenity_wifi', 'amenity_carbon_monoxide_alarm',
+                       'amenity_hot_water', 'amenity_dishes_and_silverware', 'amenity_hair_dryer', 'amenity_heating',
+                       'amenity_extra_pillows_and_blankets']
+most_frequent_impute_columns = ['host_response_time', 'host_is_superhost', 'minimum_nights_avg_ntm', 'availability_60',
+                                'availability_365', 'calculated_host_listings_count_shared_rooms', 'dist_high_line',
+                                'dist_st_georges_theatre', 'amenity_iron', 'amenity_bed_linens',
+                                'amenity_dedicated_workspace', 'amenity_microwave', 'amenity_first_aid_kit']
+constant_impute_columns = ['neighbourhood_cleansed', 'maximum_nights', 'minimum_minimum_nights', 'availability_90',
+                           'number_of_reviews', 'dist_central_park', 'dist_brooklyn_bridge', 'amenity_smoke_alarm',
+                           'amenity_essentials', 'amenity_refrigerator', 'amenity_tv', 'amenity_fire_extinguisher',
+                           'amenity_self_check-in', 'amenity_oven', 'amenity_free_street_parking',
+                           'amenity_coffee_maker', 'amenity_cleaning_products']
+
 print("Preprocessing data.")
 data_path: str = "../data/listings-full.csv"
 data: pd.DataFrame = pd.read_csv(data_path)
@@ -36,13 +52,24 @@ train_data = ColumnEncoder.frequency_encode_columns(train_data, frequency_encode
 val_data = ColumnEncoder.frequency_encode_columns(val_data, frequency_encode_columns)
 test_data = ColumnEncoder.frequency_encode_columns(test_data, frequency_encode_columns)
 
+train_data = DataImputer.impute_missing_values(train_data, mean_impute_columns, SimpleImputer(strategy="mean"))
+train_data = DataImputer.impute_missing_values(train_data, most_frequent_impute_columns,
+                                               SimpleImputer(strategy="most_frequent"))
+train_data = DataImputer.impute_missing_values(train_data, constant_impute_columns,
+                                               SimpleImputer(strategy="constant", fill_value=-9999))
 train_data = DataImputer.impute_missing_values(train_data, data.columns, SimpleImputer(strategy="median"))
+
+val_data = DataImputer.impute_missing_values(val_data, mean_impute_columns, SimpleImputer(strategy="mean"))
+val_data = DataImputer.impute_missing_values(val_data, most_frequent_impute_columns,
+                                             SimpleImputer(strategy="most_frequent"))
+val_data = DataImputer.impute_missing_values(val_data, constant_impute_columns,
+                                             SimpleImputer(strategy="constant", fill_value=-9999))
 val_data = DataImputer.impute_missing_values(val_data, data.columns, SimpleImputer(strategy="median"))
 
 x_train, y_train, x_val, y_val, x_test, y_test = DataCleaner.perform_x_y_split(train_data, val_data, test_data)
 
 print("Finding top columns.")
-top_columns: List[str] = ColumnSelector.recursive_feature_elimination(x_train, y_train, 50)
+top_columns: List[str] = ColumnSelector.recursive_feature_elimination(x_train, y_train, 100)
 # ['host_response_time', 'host_response_rate', 'host_acceptance_rate', 'host_is_superhost', 'host_listings_count', 'host_total_listings_count', 'neighbourhood_cleansed', 'room_type', 'accommodates', 'bathrooms', 'bedrooms', 'minimum_nights', 'maximum_nights', 'minimum_minimum_nights', 'maximum_minimum_nights', 'minimum_maximum_nights', 'maximum_maximum_nights', 'minimum_nights_avg_ntm', 'availability_30', 'availability_60', 'availability_90', 'availability_365', 'number_of_reviews', 'number_of_reviews_ltm', 'number_of_reviews_l30d', 'review_scores_rating', 'review_scores_cleanliness', 'review_scores_communication', 'review_scores_location', 'review_scores_value', 'calculated_host_listings_count', 'calculated_host_listings_count_entire_homes', 'calculated_host_listings_count_private_rooms', 'calculated_host_listings_count_shared_rooms', 'reviews_per_month', 'longitude', 'dist_times_square', 'dist_central_park', 'dist_empire_state_building', 'dist_statue_of_liberty', 'dist_brooklyn_bridge', 'dist_coney_island', 'dist_high_line', 'Entire condo', 'Entire loft', 'Entire serviced apartment', 'Private room in rental unit', 'Private room in resort', 'Room in boutique hotel', 'Room in hotel']
 print(f"Top columns: {top_columns}")
 x_train = x_train[top_columns]
@@ -62,4 +89,4 @@ print("Evaluating model.")
 val_preds = model.predict(x_val)
 print(ModelEvaluator.get_key_metrics(y_val, val_preds))
 ModelEvaluator.plot_predictions_vs_actuals(y_val, val_preds)
-# Best result: {'mse': 2302.032455378782, 'rmse': 47.979500366081155, 'mae': 32.3882659703898}
+# Best result: {'mse': 2214.788488467194, 'rmse': 47.06153937630168, 'mae': 31.46419238582173}

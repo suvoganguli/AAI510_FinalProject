@@ -1,3 +1,4 @@
+import ast
 import math
 from typing import Tuple
 
@@ -23,7 +24,27 @@ class DataCleaner:
         data_copy["host_acceptance_rate"] = data_copy["host_acceptance_rate"].str.replace("%", "").astype(float)
         data_copy["host_is_superhost"] = data_copy["host_is_superhost"].map({'t': 1, 'f': 0})
         data_copy = DataCleaner.populate_location_distances(data_copy)
+
+        top_amenities: pd.Series = DataCleaner.get_top_amenities(data_copy, 50)
+        for amenity in top_amenities:
+            formatted_amenity = amenity.replace(" ", "_").lower()
+            data_copy[f"amenity_{formatted_amenity}"] = data_copy['amenities'].apply(
+                lambda amenities: 1 if amenity in amenities else 0)
+        data_copy.drop(["amenities"], axis=1, inplace=True)
+
         return data_copy
+
+    @staticmethod
+    def get_top_amenities(data: pd.DataFrame, n_amenities: int) -> pd.Series:
+        data_copy = data.copy()
+        data_copy['amenities'] = data_copy['amenities'].apply(ast.literal_eval)
+
+        exploded_df = data_copy.explode('amenities')
+        amenities_count = exploded_df['amenities'].value_counts().reset_index()
+        amenities_count.columns = ['Amenity', 'Count']
+
+        sorted_amenities = amenities_count.sort_values('Count', ascending=False)
+        return sorted_amenities["Amenity"].head(n_amenities)
 
     @staticmethod
     def remove_non_training_columns(data: pd.DataFrame) -> pd.DataFrame:
@@ -44,7 +65,7 @@ class DataCleaner:
              "review_scores_cleanliness", "review_scores_checkin", "review_scores_communication",
              "review_scores_location", "review_scores_value", "calculated_host_listings_count",
              "calculated_host_listings_count_entire_homes", "calculated_host_listings_count_private_rooms",
-             "calculated_host_listings_count_shared_rooms", "reviews_per_month", "latitude", "longitude"]]
+             "calculated_host_listings_count_shared_rooms", "reviews_per_month", "latitude", "longitude", "amenities"]]
 
     @staticmethod
     def split_train_val_test(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:

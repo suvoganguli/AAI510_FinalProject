@@ -1,5 +1,5 @@
-from typing import Callable
 from math import sqrt
+from typing import Callable
 
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
