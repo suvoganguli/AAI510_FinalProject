@@ -69,8 +69,7 @@ val_data = DataImputer.impute_missing_values(val_data, data.columns, SimpleImput
 x_train, y_train, x_val, y_val, x_test, y_test = DataCleaner.perform_x_y_split(train_data, val_data, test_data)
 
 print("Finding top columns.")
-top_columns: List[str] = ColumnSelector.recursive_feature_elimination(x_train, y_train, 100)
-# ['host_response_time', 'host_response_rate', 'host_acceptance_rate', 'host_is_superhost', 'host_listings_count', 'host_total_listings_count', 'neighbourhood_cleansed', 'room_type', 'accommodates', 'bathrooms', 'bedrooms', 'minimum_nights', 'maximum_nights', 'minimum_minimum_nights', 'maximum_minimum_nights', 'minimum_maximum_nights', 'maximum_maximum_nights', 'minimum_nights_avg_ntm', 'availability_30', 'availability_60', 'availability_90', 'availability_365', 'number_of_reviews', 'number_of_reviews_ltm', 'number_of_reviews_l30d', 'review_scores_rating', 'review_scores_cleanliness', 'review_scores_communication', 'review_scores_location', 'review_scores_value', 'calculated_host_listings_count', 'calculated_host_listings_count_entire_homes', 'calculated_host_listings_count_private_rooms', 'calculated_host_listings_count_shared_rooms', 'reviews_per_month', 'longitude', 'dist_times_square', 'dist_central_park', 'dist_empire_state_building', 'dist_statue_of_liberty', 'dist_brooklyn_bridge', 'dist_coney_island', 'dist_high_line', 'Entire condo', 'Entire loft', 'Entire serviced apartment', 'Private room in rental unit', 'Private room in resort', 'Room in boutique hotel', 'Room in hotel']
+top_columns: List[str] = ColumnSelector.recursive_feature_elimination(x_train, y_train, 60)
 print(f"Top columns: {top_columns}")
 x_train = x_train[top_columns]
 x_val = x_val[top_columns]
@@ -89,4 +88,3 @@ print("Evaluating model.")
 val_preds = model.predict(x_val)
 print(ModelEvaluator.get_key_metrics(y_val, val_preds))
 ModelEvaluator.plot_predictions_vs_actuals(y_val, val_preds)
-# Best result: {'mse': 2214.788488467194, 'rmse': 47.06153937630168, 'mae': 31.46419238582173}
